@@ -1,10 +1,6 @@
 import numpy as np
 import pandas as pd
 
-alloy1=np.array([0.3, 0.3, 0.3, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-alloy2=np.array([0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-alloy3=np.array([0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0])
-alloys=([0.3, 0.3, 0.3, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0])
 
 df=pd.read_csv('parameters.csv', delimiter=';')
 atomic_radius=np.array(df['atomic_radius'])
@@ -26,7 +22,6 @@ def burgers (alloys):
     """
     b=(alloys*burgers_vector).sum(axis=1)
     return b
-b=burgers(alloys)
 
 def shear (alloys):
     """Shear Modulus calculation.
@@ -41,8 +36,7 @@ def shear (alloys):
         The array contains the shear modulus in GPa of the alloys present in this study 
     """
     G=(alloys*shear_modulus).sum(axis=1)
-    return G 
-G=shear(alloys)
+    return G
 
 def K (G,b,beta=0.18):
     """Hall-Petch constant calculation.
@@ -61,6 +55,7 @@ def K (G,b,beta=0.18):
     K=10*beta*G*b**(1/2)
     return K
 
+
 def poisson (alloys):
     """Poisson's Ratio calculation.
     
@@ -76,7 +71,6 @@ def poisson (alloys):
     
     v=(alloys*poisson_ratio).sum(axis=1)
     return v
-v=poisson(alloys)
 
 def delta_volume (alloys):
     """Calculation of the atomic volume variation.
@@ -103,7 +97,6 @@ def delta_volume (alloys):
     
     dv=V2-V1
     return dv
-dv=delta_volume(alloys)
 
 def T0(alloys, b, G, v, dv, alpha=0.123):
     """Calculation of the intrinsic lattice resistance at 0K
@@ -134,7 +127,6 @@ def T0(alloys, b, G, v, dv, alpha=0.123):
     s=(alloys*dv**2/b**6).sum(axis=1)
     T0=0.051*alpha**(-1/3)*G*p**(4/3)*0.35*s**(2/3)
     return T0
-T0=T0(alloys,b,G,v,dv)
 
 def dEb(alloys, b, G, v, dv, alpha=0.123):
     """Calculation of the total activation energy barrier at 0K
@@ -166,7 +158,6 @@ def dEb(alloys, b, G, v, dv, alpha=0.123):
     s=(alloys*dv**2/b**6).sum(axis=1)
     dEb=0.274*alpha**(1/3)*G1*b1**3*p**(2/3)*5.7*s**(1/3)
     return dEb
-dEb=dEb(alloys,b,G,v,dv)
 
 def stress(T0, dEb, ep=10**-3, T=293):
     """Calculation of the yield strength
@@ -195,4 +186,18 @@ def stress(T0, dEb, ep=10**-3, T=293):
         3060*test_parameter,
         3060*T0*np.exp(-1/0.51*k*T/dEb*np.log(10**4/ep)))
     return stress
-stress=stress(T0,dEb)
+
+if __name__ == '__main__':
+
+    alloy1=np.array([0.3, 0.3, 0.3, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    alloy2=np.array([0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    alloy3=np.array([0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0])
+    alloys=([0.3, 0.3, 0.3, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0.3, 0.1, 0.3, 0, 0, 0, 0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0.3, 0, 0, 0, 0])
+
+    b=burgers(alloys)
+    G=shear(alloys)
+    v=poisson(alloys)
+    dv=delta_volume(alloys)
+    T0=T0(alloys,b,G,v,dv)
+    dEb=dEb(alloys,b,G,v,dv)
+    stress=stress(T0,dEb)
