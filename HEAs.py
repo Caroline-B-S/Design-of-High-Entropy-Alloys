@@ -1,12 +1,30 @@
 import numpy as np
 import pandas as pd
-
+from mendeleev import element
 
 df=pd.read_csv('parameters.csv', delimiter=';')
 atomic_radius=np.array(df['atomic_radius'])
 burgers_vector=np.array(df['burgers_vector'])
 poisson_ratio=np.array(df['poisson_ratio'])
 shear_modulus=np.array(df['shear_modulus'])
+elements=np.array(df['elements'])
+
+def normalizer (alloys):
+    """Normalization of the composition of the alloy.
+    
+    Args:
+      alloys : array 2D
+        Each row of the array represents one alloy and each column represents one chemical element
+        The sum of each row must be 1
+    
+    Return:
+      norm_alloys : array 1D
+        The array contains the normalized composition of the alloy. 
+        This guarantee that the sum of each row is 1 
+    """
+    total=np.sum(alloys,axis=1).reshape((-1,1))
+    norm_alloys=alloys/total
+    return norm_alloys
 
 def burgers (alloys):
     """Burgers Vector calculation.
@@ -186,6 +204,15 @@ def stress(T0, dEb, ep=10**-3, T=293):
         3060*test_parameter,
         3060*T0*np.exp(-1/0.51*k*T/dEb*np.log(10**4/ep)))
     return stress
+
+allVEC = {element(i).symbol: element(i).nvalence() for i in elements}
+arrVEC = np.array(list(allVEC.values()))
+
+def parVEC(alloys):
+    compNorm = normalizer(alloys)
+    VEC = compNorm * arrVEC
+    VECFinal = np.sum(VEC, axis=1)
+    return VECFinal
 
 if __name__ == '__main__':
 
