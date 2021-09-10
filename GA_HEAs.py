@@ -12,7 +12,7 @@ from glas import GlassSearcher as Searcher
 from glas.constraint import Constraint
 from glas.predict import Predict
 
-from HEAs_2 import df, burgers, shear, K, poisson, delta_volume, T0, dEb, stress, parVEC
+from HEAs import df, burgers, shear, K, poisson, delta_volume, T0, dEb, stress, parVEC
 
 elements=df['elements'].values
 
@@ -168,24 +168,6 @@ constraints = {
     #     'class': ConstraintElements,
     #     'config': {
     #         'Mg': [0.10, 0.35],
-    #         # 'Al': [0.0, 0.35],
-    #         # 'Ti': [0.0, 0.35],
-    #         # 'V': [0.0, 0.35],
-    #         # 'Cr': [0.0, 0.35],
-    #         # 'Mn': [0.0, 0.35],
-    #         # 'Fe': [0.0, 0.35],
-    #         # 'Co': [0.0, 0.35],
-    #         # 'Ni': [0.0, 0.35],
-    #         # 'Cu': [0.0, 0.35],
-    #         # 'Zn': [0.0, 0.35],
-    #         # 'Zr': [0.0, 0.35],
-    #         # 'Nb': [0.0, 0.35],
-    #         # 'Mo': [0.0, 0.35],
-    #         # 'Pd': [0.0, 0.35],
-    #         # 'La': [0.0, 0.35],
-    #         # 'Hf': [0.0, 0.35],
-    #         # 'Ta': [0.0, 0.35],
-    #         # 'W': [0.0, 0.35],
     #     },
     # },
    
