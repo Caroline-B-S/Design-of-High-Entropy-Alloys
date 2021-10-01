@@ -12,7 +12,7 @@ from glas import GlassSearcher as Searcher
 from glas.constraint import Constraint
 from glas.predict import Predict
 
-from HEAs import df, burgers, shear, K, poisson, delta_volume, T0, dEb, stress, parVEC
+from HEAs import df, burgers, shear, K, poisson, delta_volume, T0, dEb, stress, parVEC, parPhi
 
 elements=df['elements'].values
 
@@ -116,21 +116,21 @@ class ConstraintVEC(Constraint):
         penalty = bad * base_penalty + distance**2
         return penalty
 
-# class ConstraintPhi(Constraint):
-#     def __init__(self, config, **kwargs):
-#         super().__init__()
-#         self.config = config
+class ConstraintPhi(Constraint):
+    def __init__(self, config, **kwargs):
+        super().__init__()
+        self.config = config
 
-#     def compute(self, population_dict, base_penalty):
-#         value = parPhi(population_dict['population_array'])
-#         bad = value <= self.config['min']
+    def compute(self, population_dict, base_penalty):
+        value = parPhi(population_dict['population_array'])
+        bad = value <= self.config['min']
 
-#         distance_min = self.config['min'] - value
-#         distance = np.zeros(len(value))
-#         distance[bad] += distance_min[bad]
+        distance_min = self.config['min'] - value
+        distance = np.zeros(len(value))
+        distance[bad] += distance_min[bad]
 
-#         penalty = bad * base_penalty + distance**2
-#         return penalty
+        penalty = bad * base_penalty + distance**2
+        return penalty
     
 ###############################################################################
 #                            Search Class                                     #
@@ -171,12 +171,12 @@ constraints = {
     #     },
     # },
    
-    # 'phi': {
-    #     'class': ConstraintPhi,
-    #     'config': {
-    #         'min': 20,
-    #     },
-    # },
+    'phi': {
+        'class': ConstraintPhi,
+        'config': {
+            'min': 20,
+        },
+    },
  
     'VEC': {
         'class': ConstraintVEC,
@@ -188,8 +188,8 @@ constraints = {
 }
 
 config = {
-    'num_generations': 10,
-    'population_size': 10,
+    'num_generations':200,
+    'population_size': 100,
     'hall_of_fame_size': 1,
     'num_repetitions': 2,
     'compound_list': list(elements),
