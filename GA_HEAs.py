@@ -267,4 +267,5 @@ for p, hof in enumerate(all_hof):
     print()
     for n, ind in enumerate(hof):
         print(f'Position {n+1} (mol%)')
+        print(f'Fitness: {S.fitness_function([ind])[0]:5f}')
         S.report_dict(ind, verbose=True)
