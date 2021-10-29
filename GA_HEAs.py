@@ -7,6 +7,7 @@ import pandas as pd
 import math
 from scipy import constants
 from mendeleev import element
+from deap import tools
 
 from glas import GlassSearcher as Searcher
 from glas.constraint import Constraint
@@ -20,6 +21,7 @@ def normalizer (alloys):
     total=np.sum(alloys,axis=1).reshape((-1,1))
     norm_alloys=alloys/total
     return norm_alloys
+
 
 ###############################################################################
 #                             Predict Class                                   #
@@ -67,6 +69,7 @@ class Predictstress(Predict):
     def is_within_domain(self, population_dict):
         return np.ones(len(population_dict['population_array'])).astype(bool)    
  
+
 ###############################################################################
 #                           Constraint Class                                  #
 ##############################################################################+
@@ -132,8 +135,44 @@ class ConstraintPhi(Constraint):
         penalty = bad * base_penalty + distance**2
         return penalty
     
+
 ###############################################################################
 #                            Search Class                                     #
+##############################################################################+
+
+class Searcher(Searcher):
+    '''Searcher class with some extra configurations
+
+    Changes:
+        + Now the class reports the number of repetition that it is running
+
+    '''
+    def __init__(self, config, design, constraints={}, run_num=0):
+
+        self.run_num = run_num
+        super().__init__(config, design, constraints)
+
+    def callback(self):
+        best_fitness = min([ind.fitness.values[0] for ind in self.population])
+        print(
+            'Finished generation {1}/{0}. '.format(
+                str(self.generation).zfill(3),
+                str(self.run_num).zfill(2)
+            ),
+            f'Best fitness is {best_fitness:.3g}. '
+        )
+
+        if self.generation % self.report_frequency == 0:
+            if best_fitness < self.base_penalty:
+                best_ind = tools.selBest(self.population, 1)[0]
+                print('\nBest individual in this population (in mol%):')
+                self.report_dict(best_ind, verbose=True)
+
+
+    
+
+###############################################################################
+#                         Design, Constraint & Config                         #
 ##############################################################################+
 
 design = {
@@ -200,8 +239,8 @@ config = {
 ##############################################################################+
 
 all_hof = []
-for _ in range(config['num_repetitions']):
-    S = Searcher(config, design, constraints)
+for i in range(config['num_repetitions']):
+    S = Searcher(config, design, constraints, i+1)
     S.start()
     S.run(config['num_generations'])
     all_hof.append(S.hof)
