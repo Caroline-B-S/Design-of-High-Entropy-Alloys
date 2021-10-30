@@ -13,7 +13,8 @@ from glas import GlassSearcher as Searcher
 from glas.constraint import Constraint
 from glas.predict import Predict
 
-from HEAs import df, burgers, shear, K, poisson, delta_volume, T0, dEb, stress, parVEC, parPhi
+from HEAs import (df, burgers, shear, K, poisson, delta_volume, T0, dEb, stress,
+                  parVEC, parPhi)
 
 elements=df['elements'].values
 
@@ -169,8 +170,6 @@ class Searcher(Searcher):
                 self.report_dict(best_ind, verbose=True)
 
 
-    
-
 ###############################################################################
 #                         Design, Constraint & Config                         #
 ##############################################################################+
@@ -234,6 +233,7 @@ config = {
     'compound_list': list(elements),
 }
 
+
 ###############################################################################
 #                                    Search                                   #
 ##############################################################################+
@@ -245,8 +245,9 @@ for i in range(config['num_repetitions']):
     S.run(config['num_generations'])
     all_hof.append(S.hof)
 
+
 ###############################################################################
-#                                    Report                                   #
+#                                 Print Report                                #
 ##############################################################################+
 
 print()
@@ -269,3 +270,45 @@ for p, hof in enumerate(all_hof):
         print(f'Position {n+1} (mol%)')
         print(f'Fitness: {S.fitness_function([ind])[0]:5f}')
         S.report_dict(ind, verbose=True)
+
+
+###############################################################################
+#                                 File Report                                 #
+##############################################################################+
+
+alloys = []
+prop = []
+
+# Todas essas funções precisam ter como único argumento uma lista de alloys
+dict_functions = {
+    "VEC": parVEC,
+    "phi": parPhi,
+    "shear": shear,
+}
+
+for p, hof in enumerate(all_hof):
+
+    norm_alloys = normalizer(hof)
+    df = pd.DataFrame(norm_alloys, columns=list(elements)) * 100
+    alloys.append(df)
+
+    properties = pd.DataFrame(S.fitness_function(hof), columns=["fitness"])
+    prop.append(properties)
+
+    for ID, fun in dict_functions.items():
+        properties = pd.DataFrame(fun(hof), columns=[ID])
+        prop.append(properties)
+
+df = pd.concat(alloys, axis=0)
+df = df.reset_index(drop=True)
+
+# Aqui está um migué forte... definitivamente existe um jeito mais legível de fazer
+# essa properties...
+properties = pd.concat(prop, axis=0)
+properties = [
+    properties[col].dropna().reset_index(drop=True) for col in properties.columns
+]
+properties = pd.concat(properties, axis=1).reset_index(drop=True)
+
+table = pd.concat([df, properties], axis=1)
+table.to_excel(f'{datetime.now().strftime("%d%m%Y_%H%M%S")}.xlsx')
